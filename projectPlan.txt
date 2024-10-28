@@ -1,20 +1,33 @@
 Nucleosome Positioning Steps:
 
 1. Get raw data
+
+/ We will start with data of healthy individuals / 
+
 2. Map reads
+
+/ To do the mapping we will try to use nf-core pipelines and will try Nextflow to put our pipeline together;  
+After mapping we will take just one chromosome to work through the rest of the steps. We better identify a chromosome that has marker genes of the lymphoid or myeloid genes /
+
 3. Compute windowed protection score (WPS) for each genomic coordinate:
 	for coordinate x:
 		count number of fragments that spans 120bp window (i.e. starts before x-60 and ends after x+60)
 		substract number of fragments that have endpoints in 120bp window (i.e. have one or both endpoints in the interval [x-60,x+60])
 4. Apply peak-calling algorithm to find local maxima:
 	L-WPS is locally adjusted to a running median of zero in 1 kb windows and smoothed using a Savitzky-Golay filter
-	(window size 21, second-order polynomial) (???)
+	(window size 21, second-order polynomial) (???) 
+
+/ response to ???  "Locally adjusted to a running median of zero in 1 kb windows" : correct if wrong - in each non overlapping 1000 bases long consecutive windows we compute a median of WPS values and subtract it fom each WPS value in the window/ response to ???  " smoothed using a Savitzky-Golay filter " :  the program for the filter is available https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html , however a paper is not free https://pubs.acs.org/doi/abs/10.1021/ac60214a047, there is another article along the same lines https://pubs.acs.org/doi/10.1021/acsmeasuresciau.1c00054 , not sure if it is sufficient. / 
+
 	L-WPS track is then segmented into above-zero regions (allowing up to five consecutive positions below zero)
 	
 	If resulting region is 50-150bp:
 		identify median of this region
 		"search for the maximum-sum contiguous window above the median" (???)
-		save start, end, and center coordinates of this window as the 'peak'
+
+/ response to ??? : in the resulting region x is position, v is the value at that position,  we compute a sum of values v at the spans of contiguous consecutive positions x . Then we compare these sums with the median. If the sum is above the median , then we remember and record that window  as it is in the following " save start, end and center coordinates ..." /  
+
+save start, end, and center coordinates of this window as the 'peak'
 	If resulting region is 150-450bp:
 		apply the same approach as in 50-150bp case, but report only those windows that are 50-150bp
 	Discard regions that are <50 or >450

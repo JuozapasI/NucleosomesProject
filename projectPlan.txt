@@ -1,0 +1,26 @@
+Nucleosome Positioning Steps:
+
+1. Get raw data
+2. Map reads
+3. Compute windowed protection score (WPS) for each genomic coordinate:
+	for coordinate x:
+		count number of fragments that spans 120bp window (i.e. starts before x-60 and ends after x+60)
+		substract number of fragments that have endpoints in 120bp window (i.e. have one or both endpoints in the interval [x-60,x+60])
+4. Apply peak-calling algorithm to find local maxima:
+	L-WPS is locally adjusted to a running median of zero in 1 kb windows and smoothed using a Savitzky-Golay filter
+	(window size 21, second-order polynomial) (???)
+	L-WPS track is then segmented into above-zero regions (allowing up to five consecutive positions below zero)
+	
+	If resulting region is 50-150bp:
+		identify median of this region
+		"search for the maximum-sum contiguous window above the median" (???)
+		save start, end, and center coordinates of this window as the 'peak'
+	If resulting region is 150-450bp:
+		apply the same approach as in 50-150bp case, but report only those windows that are 50-150bp
+	Discard regions that are <50 or >450
+	
+	A score for each peak is determined as the distance between maximum value in the window
+	and the average of the two adjacent L-WPS minima neighboring the region. (?)
+5. 
+	
+

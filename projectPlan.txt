@@ -33,7 +33,20 @@ save start, end, and center coordinates of this window as the 'peak'
 	Discard regions that are <50 or >450
 	
 	A score for each peak is determined as the distance between maximum value in the window
-	and the average of the two adjacent L-WPS minima neighboring the region. (?)
-5. 
+	and the average of the two adjacent L-WPS minima neighboring the region.
+	
+5. Compute median peak-to-peak spacing within 100kb windows (non-overlapping) in compartments A and B separatelly
+	(this will not be used in subsequent steps)
+
+6. Recalculate WPS scores on long (120-180bp, using 120bp window) and short (35-80bp, using 16bp windows) reads separatelly
+
+7. Compare L-WPS and S-WPS scores with data available from databases (ENSEMBLE)
+
+8. Examine peak-to-peak distance withis DHS sites.
+	By the comparison spacing of the different DHS sites (corresponding to various cell types), we are able to induce tissue of the origin
+	
+9. Examine peak-to-peak distance in TSS sites.
+
+10. Perform fast Fourier Transform on the L-WPS across the first 10kb of gene bodies.
 	
 

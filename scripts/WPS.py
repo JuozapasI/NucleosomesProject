@@ -4,7 +4,7 @@ bed_file_path = ""
 output_file_path = ""
 window = 120
 half_window = window // 2
-chr_length = 
+chr_length = 0
 scores = np.zeros(chr_length)
 
 with open(bed_file_path, "r") as file:
@@ -23,6 +23,6 @@ with open(bed_file_path, "r") as file:
         else:
             scores[start:(start+half_window)] -= 1
             scores[(start+half_window):(end-half_window)] += 1
-            scores[((start+half_window):end] -= 1
+            scores[(start+half_window):end] -= 1
                    
-np.savetxt(output_file_path, array, fmt="%d")
+np.savetxt(output_file_path, scores, fmt="%d")

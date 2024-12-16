@@ -1,10 +1,11 @@
 import numpy as np
+import sys
 
-bed_file_path = ""
-output_file_path = ""
-window = 120
+bed_file_path = sys.argv[1]
+output_file_path = sys.argv[2]
+window = int(sys.argv[3])
+chr_length = int(sys.argv[4])
 half_window = window // 2
-chr_length = 0
 scores = np.zeros(chr_length)
 
 with open(bed_file_path, "r") as file:

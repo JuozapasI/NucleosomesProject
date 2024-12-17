@@ -20,7 +20,7 @@ with open(bed_file_path, "r") as file:
 
         length = end - start
         if length <= window:
-            scores[start:end] -= 1
+            scores[(start-half_window):(end+half_window)] -= 1
         else:
             scores[(start-half_window):(start+half_window)] -= 1
             scores[(start+half_window):(end-half_window)] += 1

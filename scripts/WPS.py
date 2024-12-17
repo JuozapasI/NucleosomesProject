@@ -22,8 +22,8 @@ with open(bed_file_path, "r") as file:
         if length <= window:
             scores[start:end] -= 1
         else:
-            scores[start:(start+half_window)] -= 1
+            scores[(start-half_window):(start+half_window)] -= 1
             scores[(start+half_window):(end-half_window)] += 1
-            scores[(start+half_window):end] -= 1
-                   
+            scores[(start+half_window):(end+half_window)] -= 1
+
 np.savetxt(output_file_path, scores, fmt="%d")

@@ -6,17 +6,15 @@ output_file_path = sys.argv[2]
 window = int(sys.argv[3])
 chr_length = int(sys.argv[4])
 half_window = window // 2
-scores = np.zeros(chr_length)
+scores = np.zeros(chr_length, dtype=int)
 
 with open(bed_file_path, "r") as file:
     for line in file:
-        # Skip comments or headers if necessary
-        if line.startswith("#") or line.strip() == "":
-            continue
-
         # Split the line into columns
         columns = line.strip().split("\t")
-        chrom, start, end = columns[:3]
+        chrom = columns[0]
+        start = int(columns[1])
+        end = int(columns[2])
 
         length = end - start
         if length <= window:
@@ -24,6 +22,6 @@ with open(bed_file_path, "r") as file:
         else:
             scores[(start-half_window):(start+half_window)] -= 1
             scores[(start+half_window):(end-half_window)] += 1
-            scores[(start+half_window):(end+half_window)] -= 1
+            scores[(end-half_window):(end+half_window)] -= 1
 
 np.savetxt(output_file_path, scores, fmt="%d")

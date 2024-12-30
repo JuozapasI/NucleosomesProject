@@ -21,4 +21,4 @@ median_adjusted_data = data - median_filter(data, size=window_size)
 smoothed_data = savgol_filter(median_adjusted_data, savitzky_golay_window, savitzky_golay_order)
 
 # Save the processed data to a new CSV file
-np.savetxt(output, smoothed_data, delimiter=",")
+np.savetxt(output, smoothed_data, delimiter=",", fmt="%.5f")

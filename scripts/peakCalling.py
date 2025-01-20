@@ -1,55 +1,78 @@
 import numpy as np
 import sys
+from collections import defaultdict
+
+if len(sys.argv) == 1:
+    print("Usage: python peakCalling.py <segments> <scores> <output>")
+    sys.exit(1)
 
 segments_file = sys.argv[1]
 scores_file = sys.argv[2]
 output_file = sys.argv[3]
 
-# Load data
-segments = np.loadtxt(segments_file, dtype=int)
-scores = np.loadtxt(scores_file, dtype=float)
-
-no_segments = len(segments)
 
 # Function to find maximum-sum contiguous window above the median
-def peak(start, end):
-    median = np.median(scores[start:end])
+def peak(chrom, start, end):
+    median = np.median(scores[chrom][start:end])
     max_sum = 0
     current_sum = 0
     peak_start = -1
     peak_end = -1
-    tmp_start = 0
+    tmp_start = start
 
-    for i in range(start, end):
-        if scores[i] <= median:
+    for i in range(start, end +1):
+        if scores[chrom][i] <= median:
             if current_sum > max_sum:
                 max_sum = current_sum
                 peak_start = tmp_start
-                peak_end = i
+                peak_end = i - 1
             current_sum = 0
-            tmp_start = i+1
+            tmp_start = i + 1
         else:
-            current_sum += scores[i]
+            current_sum += scores[chrom][i]
 
     if current_sum > max_sum:
-                max_sum = current_sum
-                peak_start = tmp_start
-                peak_end = end
+        max_sum = current_sum
+        peak_start = tmp_start
+        peak_end = end
+    
+    if peak_start == -1:
+        return [str(i) for i in [-1, -1, -1, -1, -1]]
+    peak_centre = int((peak_start + peak_end) / 2)
+    score = max(scores[chrom][(peak_start):(peak_end)]) - min(scores[chrom][start:end])
+    return [str(i) for i in [chrom, peak_start, peak_end, peak_centre, score]]
 
-    peak_centre = int((peak_start+peak_end)/2)
 
-    return np.array([peak_start, peak_end, peak_centre, median], dtype=float)
+print("Starting")
+scores = defaultdict(list)  # Dictionary of lists
+with open(scores_file, 'r') as file:
+    print("Loading scores")
+    for line in file:
+        parts = line.strip().split("\t")  # Split the line by tab
+        key = parts[0]                    # First column as key
+        value = float(parts[3])           # Fourth column as value
+        scores[key].append(value)         # Append value to the corresponding key
+print("Scores loaded")
 
 peaks = []
+with open(segments_file, "r") as seg_file:
+    c = 0
+    for line in seg_file:
+        c += 1
+        if c % 100000 == 0:
+            print(c, "segments done.")
+        chrom, start, end = line.strip().split()
+        start, end = int(start), int(end)
 
-for i in range(no_segments):
-    length = segments[i,1] - segments[i,0]
-    if length > 50 and length <= 450:
-        highest_peak = np.array(peak(segments[i,0], segments[i,1]))
-        peaks.append(highest_peak)
+        length = end - start
+        if length > 50 and length <= 450:
+            highest_peak = peak(chrom, start, end)
+            if int(highest_peak[2]) - int(highest_peak[1]) > 50 and int(highest_peak[2]) - int(highest_peak[1]) < 150:
+                peaks.append(highest_peak)
 
-    #elif length > 150 and length <= 450:
-    #    highest_peak = peak(segments[i,0], segments[i,1])
-    #    peaks.append(highest_peak)
+with open(output_file, "w") as output:
+    print("Writing output")
+    for peak in peaks:
+        output.write("\t".join(peak) + "\n")
 
-np.savetxt(output_file, peaks, fmt=["%d", "%d", "%d", "%.5f"])
+print("Done.")

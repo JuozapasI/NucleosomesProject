@@ -4,9 +4,19 @@ import sys
 bed_file_path = sys.argv[1]
 output_file_path = sys.argv[2]
 window = int(sys.argv[3])
-chr_length = int(sys.argv[4])
+fasta_index = sys.argv[4]
 half_window = window // 2
-scores = np.zeros(chr_length, dtype=int)
+
+chr_lengths = {}
+
+with open(fasta_index, "r") as file:
+	for line in file:
+		columns = line.split('\t')
+		chr = columns[0]
+		length = int(columns[1])
+		chr_lengths[chr] = length
+
+scores = { key: np.zeros(chr_lengths[key], dtype = int) for key in chr_lengths }
 
 with open(bed_file_path, "r") as file:
     for line in file:
@@ -18,10 +28,16 @@ with open(bed_file_path, "r") as file:
 
         length = end - start
         if length <= window:
-            scores[(start-half_window):(end+half_window)] -= 1
+            scores[chrom][(start-half_window):(end+half_window)] -= 1
         else:
-            scores[(start-half_window):(start+half_window)] -= 1
-            scores[(start+half_window):(end-half_window)] += 1
-            scores[(end-half_window):(end+half_window)] -= 1
+            scores[chrom][(start-half_window):(start+half_window)] -= 1
+            scores[chrom][(start+half_window):(end-half_window)] += 1
+            scores[chrom][(end-half_window):(end+half_window)] -= 1
 
-np.savetxt(output_file_path, scores, fmt="%d")
+
+
+with open(output_file_path, "w") as file:
+    for key, value_list in scores.items():
+        for position, value in enumerate(value_list):
+            file.write(f"{key}\t{position}\t{position}\t{value}\n")
+
